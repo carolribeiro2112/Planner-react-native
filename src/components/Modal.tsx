@@ -32,7 +32,7 @@ export function Modal({
         tint="dark"
         experimentalBlurMethod="dimezisBlurView"
       >
-        <View className="flex-1 justify-end bg-black/60">
+        <View className="flex-1 justify-center bg-black/60">
           <View className="bg-zinc-900 border-t border-zinc-700 px-6 pt-5 pb-10">
             <ScrollView showsVerticalScrollIndicator={false}>
               <View className="flex-row justify-between items-center pt-5">
