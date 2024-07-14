@@ -11,13 +11,17 @@ import {
 import dayjs from "dayjs";
 import { colors } from "@/styles/colors";
 import { Button } from "@/components/Button";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Modal } from "@/components/Modal";
 import { Calendar } from "@/components/Calendar";
 import { calendarUtils, DatesSelected } from "@/utils/calendarUtils";
 import { DateData } from "react-native-calendars";
 import { GuestEmail } from "@/components/Email";
 import { validateInput } from "@/utils/validateInput";
+import { tripStorage } from "@/storage/trip";
+import { router } from "expo-router";
+import { tripServer } from "@/server/trip-server";
+import { Loading } from "@/components/Loading";
 
 enum StepForm {
   TRIP_DETAILS = 1,
@@ -31,6 +35,8 @@ enum MODAL {
 }
 
 export default function Index() {
+  const [isCreatingTrip, setIsCreatingTrip] = useState(false);
+  // const [isGettingTrip, setIsGettingTrip] = useState(true);
   const [stepForm, setStepForm] = useState(StepForm.TRIP_DETAILS);
   const [selectedDates, setSelectedDates] = useState({} as DatesSelected);
   const [destination, setDestination] = useState("");
@@ -60,6 +66,17 @@ export default function Index() {
     if (stepForm === StepForm.TRIP_DETAILS) {
       return setStepForm(StepForm.ADD_EMAILS);
     }
+
+    Alert.alert("Nova viagem", "Confirmar viagem?", [
+      {
+        text: "Não",
+        style: "cancel",
+      },
+      {
+        text: "Sim",
+        onPress: createTrip,
+      },
+    ]);
   }
 
   function handleSelectDate(selectedDay: DateData) {
@@ -92,6 +109,68 @@ export default function Index() {
     setEmailsToInvite((prevState) => [...prevState, emailToInvite]);
     setEmailToInvite("");
   }
+
+  async function saveTrip(tripId: string) {
+    try {
+      await tripStorage.save(tripId);
+      router.navigate("/trip/" + tripId);
+    } catch (error) {
+      Alert.alert(
+        "Salvar viagem",
+        "Não foi possível salvar o id da viagem no dispositivo"
+      );
+    }
+  }
+
+  async function createTrip() {
+    try {
+      setIsCreatingTrip(true);
+
+      const newTrip = await tripServer.create({
+        destination,
+        starts_at: dayjs(selectedDates.startsAt?.dateString).toString(),
+        ends_at: dayjs(selectedDates.endsAt?.dateString).toString(),
+        emails_to_invite: emailsToInvite,
+      });
+
+      Alert.alert("Nova viagem", "Viagem criada com sucesso!", [
+        {
+          text: "OK. Continuar.",
+          onPress: () => saveTrip(newTrip.tripId),
+        },
+      ]);
+    } catch (error) {
+      console.log(error);
+      setIsCreatingTrip(false);
+    }
+  }
+
+  // async function getTrip() {
+  //   try {
+  //     const tripID = await tripStorage.get();
+
+  //     if (!tripID) {
+  //       return setIsGettingTrip(false);
+  //     }
+
+  //     const trip = await tripServer.getById(tripID);
+
+  //     if (trip) {
+  //       return router.navigate("/trip/" + trip.id);
+  //     }
+  //   } catch (error) {
+  //     setIsGettingTrip(false);
+  //     console.log(error);
+  //   }
+  // }
+
+  // useEffect(() => {
+  //   getTrip();
+  // }, []);
+
+  // if (isGettingTrip) {
+  //   return <Loading />;
+  // }
 
   return (
     <View className="flex-1 items-center justify-center px-5">
@@ -164,7 +243,7 @@ export default function Index() {
           </>
         )}
 
-        <Button onPress={handleNextStepForm}>
+        <Button onPress={handleNextStepForm} isLoading={isCreatingTrip}>
           <Button.Title>
             {stepForm === StepForm.TRIP_DETAILS
               ? "Continuar"
