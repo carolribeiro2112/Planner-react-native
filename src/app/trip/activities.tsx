@@ -39,19 +39,12 @@ type TripActivities = {
 };
 
 export function Activities({ tripDetails }: Props) {
-  // MODAL
   const [showModal, setShowModal] = useState(MODAL.NONE);
-
-  // LOADING
   const [isCreatingActivity, setIsCreatingActivity] = useState(false);
   const [isLoadingActivities, setIsLoadingActivities] = useState(true);
-
-  // DATA
   const [activityTitle, setActivityTitle] = useState("");
   const [activityDate, setActivityDate] = useState("");
   const [activityHour, setActivityHour] = useState("");
-
-  // LISTS
   const [tripActivities, setTripActivities] = useState<TripActivities[]>([]);
 
   function resetNewActivityFields() {
