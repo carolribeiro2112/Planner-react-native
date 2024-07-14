@@ -36,7 +36,7 @@ enum MODAL {
 
 export default function Index() {
   const [isCreatingTrip, setIsCreatingTrip] = useState(false);
-  // const [isGettingTrip, setIsGettingTrip] = useState(true);
+  const [isGettingTrip, setIsGettingTrip] = useState(true);
   const [stepForm, setStepForm] = useState(StepForm.TRIP_DETAILS);
   const [selectedDates, setSelectedDates] = useState({} as DatesSelected);
   const [destination, setDestination] = useState("");
@@ -145,32 +145,32 @@ export default function Index() {
     }
   }
 
-  // async function getTrip() {
-  //   try {
-  //     const tripID = await tripStorage.get();
+  async function getTrip() {
+    try {
+      const tripID = await tripStorage.get();
 
-  //     if (!tripID) {
-  //       return setIsGettingTrip(false);
-  //     }
+      if (!tripID) {
+        return setIsGettingTrip(false);
+      }
 
-  //     const trip = await tripServer.getById(tripID);
+      const trip = await tripServer.getById(tripID);
 
-  //     if (trip) {
-  //       return router.navigate("/trip/" + trip.id);
-  //     }
-  //   } catch (error) {
-  //     setIsGettingTrip(false);
-  //     console.log(error);
-  //   }
-  // }
+      if (trip) {
+        return router.navigate("/trip/" + trip.id);
+      }
+    } catch (error) {
+      setIsGettingTrip(false);
+      console.log(error);
+    }
+  }
 
-  // useEffect(() => {
-  //   getTrip();
-  // }, []);
+  useEffect(() => {
+    getTrip();
+  }, []);
 
-  // if (isGettingTrip) {
-  //   return <Loading />;
-  // }
+  if (isGettingTrip) {
+    return <Loading />;
+  }
 
   return (
     <View className="flex-1 items-center justify-center px-5">
